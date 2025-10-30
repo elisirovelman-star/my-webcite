@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kompyuterlər</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./shoppingpagefinal.css">
+</head>
+
+<body>
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner-border text-warning" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Yüklənir...</span>
+    </div>
+  </div>
+
+
+
+  <div class="container-fluid">
+    <nav class="navbar">
+      <a href="./homepagefinal.html" id="mainPageBtn" class="btn btn-warning">Əsas səhifə</a>
+    </nav>
+
+
+
+    <div class="row gx-0">
+      <div class="col-md-3 col-lg-2 sidebar">
+        <input type="text" id="searchInput" class="form-control mb-3" placeholder="Axtarış..." />
+        <ul class="list-group" id="brandList">
+          <li class="list-group-item">Acer</li>
+          <li class="list-group-item">HP</li>
+          <li class="list-group-item">Asus</li>
+          <li class="list-group-item">Dell</li>
+          <li class="list-group-item">Lenovo</li>
+          <li class="list-group-item">LG</li>
+          <li class="list-group-item">Casper</li>
+          <li class="list-group-item">Fujitsu</li>
+          <li class="list-group-item">Nexus</li>
+          <li class="list-group-item">Samsung</li>
+          <li class="list-group-item">Toshiba</li>
+          <li class="list-group-item">Sony</li>
+        </ul>
+      </div>
+
+
+
+
+      <div class="col-md-9 col-lg-10 p-4">
+        <div class="row g-3" id="productList"></div>
+      </div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="detailModal" tabindex="-1">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailTitle">Məhsul haqqında</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="detailBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="floating-search">
+    <input type="text" id="floatingSearchInput" class="form-control" placeholder="Axtar..." />
+  </div>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="./shoppingpagefinal.js"></script>
+</body>
+
+</html>

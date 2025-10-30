@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Yeni məhsul əlavə et</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        #preview {
+            margin-top: 10px;
+        }
+
+        .clickable-img {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .clickable-img:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid mt-4">
+        <a href="./homepagefinal.html"><button class="btn btn-warning mb-4">Əsas səhifə</button></a>
+        <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#dataModal">Əlavə et</button>
+
+        <table id="dataTable" class="display table table-bordered table-striped w-100">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ad</th>
+                    <th>Şəkil</th>
+                    <th>Qiymət</th>
+                    <th>Əməliyyatlar</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="dataModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <form id="dataForm" class="needs-validation" novalidate>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Yeni məhsul əlavə et</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Kateqoriya:</label>
+                                <select class="form-select" id="kateqoriya" required>
+                                    <option disabled selected>Seçin...</option>
+                                    <option value="Acer">Acer</option>
+                                    <option value="HP">HP</option>
+                                    <option value="Asus">Asus</option>
+                                    <option value="Dell">Dell</option>
+                                    <option value="Lenovo">Lenovo</option>
+                                    <option value="LG">LG</option>
+                                    <option value="Casper">Casper</option>
+                                    <option value="Fujitsu">Fujitsu</option>
+                                    <option value="Nexus">Nexus</option>
+                                    <option value="Samsung">Samsung</option>
+                                    <option value="Toshiba">Toshiba</option>
+                                    <option value="Sony">Sony</option>
+                                </select>
+                                <div class="invalid-feedback">Zəhmət olmasa kateqoriya seçin</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Əməli yaddaş (GB):</label>
+                                <input id="emmeliyaddas" type="text" class="form-control" minlength="2" maxlength="30"
+                                    required>
+                                <div class="invalid-feedback">Əməli yaddaş boş buraxıla bilməz (2–30 simvol)</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Ad:</label>
+                                <input id="ad" type="text" class="form-control" minlength="1" maxlength="100" required>
+                                <div class="invalid-feedback">Ad boş buraxıla bilməz</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Mərkəzi prosessor:</label>
+                                <input id="prossessor" type="text" class="form-control" minlength="2" maxlength="300"
+                                    required>
+                                <div class="invalid-feedback">Prosessoru daxil edin (2–300 simvol)</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Qiymət:</label>
+                                <input id="qiymet" type="number" class="form-control" required>
+                                <div class="invalid-feedback">Qiymət boş buraxıla bilməz</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Daimi yaddaş (GB):</label>
+                                <input id="daimiyaddas" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Daimi yaddaş boş buraxıla bilməz</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Təsvir:</label>
+                                <input id="tesvir" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Təsvir boş buraxıla bilməz</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Daimi yaddaş tipi:</label>
+                                <input id="daimiyaddastipi" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Daimi yaddaş tipini daxil edin</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Batareya:</label>
+                                <input id="batareya" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Batareya boş buraxıla bilməz</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Video kart (GB):</label>
+                                <input id="ekran" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Video kart dəyərini daxil edin</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Əməliyyat sistemi:</label>
+                                <input id="emmeliyyatsistem" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Əməliyyat sistemi boş buraxıla bilməz</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Yeni:</label>
+                                <select class="form-select" id="yeni" required>
+                                    <option disabled selected>Seçin...</option>
+                                    <option value="Bəli">Bəli</option>
+                                    <option value="Yox">Yox</option>
+                                </select>
+                                <div class="invalid-feedback">Zəhmət olmasa seçim edin</div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Şəkil URL:</label>
+                                <input id="photo" type="text" class="form-control" placeholder="Şəkil linkini daxil et"
+                                    required>
+                                <img id="preview" src="" alt="Preview"
+                                    style="width:100px;height:100px;object-fit:contain;border-radius:8px;display:none;">
+                                <div class="invalid-feedback">Şəkil linkini daxil edin</div>
+                            </div>
+                        </div>
+
+                        <div class="text-end py-3">
+                            <button type="reset" class="btn btn-warning">Təmizlə</button>
+                            <button type="submit" class="btn btn-success">Yadda saxla</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="photoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" class="img-fluid" alt="photo">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+    <script src="./melaptoppagefinal.js"></script>
+
+</body>
+
+</html>

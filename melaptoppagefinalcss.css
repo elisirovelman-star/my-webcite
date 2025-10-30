@@ -1,0 +1,50 @@
+ body {
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+
+        .preview-img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 8px;
+            display: block;
+        }
+         table.dataTable tbody td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        #dataTable th:nth-child(1),
+        #dataTable td:nth-child(1) {
+            width: 5%;
+        }
+
+        #dataTable th:nth-child(2),
+        #dataTable td:nth-child(2) {
+            width: 35%;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        #dataTable th:nth-child(3),
+        #dataTable td:nth-child(3) {
+            width: 15%;
+            text-align: left;
+        }
+
+        #dataTable th:nth-child(4),
+        #dataTable td:nth-child(4) {
+            width: 15%;
+            text-align: left;
+        }
+
+        #dataTable th:nth-child(5),
+        #dataTable td:nth-child(5) {
+            width: 30%;
+            text-align: left;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+        }
