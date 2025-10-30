@@ -1,26 +1,27 @@
 // 🔹 Firebase bağlantısı
-import { db, ref, onValue, push } from "./firebase.js";
+import { db, ref, onValue } from "./firebase.js";
 
-// 🔹 HTML elementləri
+// 🔹 HTML elementlərini seçirik
 const productList = document.getElementById("productList");
 const searchInput = document.getElementById("searchInput");
 const floatingSearchInput = document.getElementById("floatingSearchInput");
 const brandList = document.getElementById("brandList");
 const loadingOverlay = document.getElementById("loadingOverlay");
 
-let products = []; // Firebase-dən gələn məhsullar saxlanacaq
+// 🔹 Məhsul siyahısı Firebase-dən gələcək
+let firebaseProducts = [];
 
-// 🔹 Loading overlay göstərmək
+// 🔹 Yüklənmə animasiyası
 function showLoading(callback) {
-  if (!loadingOverlay) return callback ? callback() : null;
+  if (!loadingOverlay) return callback && callback();
   loadingOverlay.classList.add("show");
   setTimeout(() => {
     loadingOverlay.classList.remove("show");
     if (callback) callback();
-  }, 500);
+  }, 800);
 }
 
-// 🔹 Məhsulları göstərmək
+// 🔹 Məhsulları ekrana yazmaq funksiyası
 function renderProducts(list) {
   if (!productList) return;
   productList.innerHTML = "";
@@ -30,7 +31,7 @@ function renderProducts(list) {
   }
 
   list.forEach((prod) => {
-    const userDisplay = prod.user && prod.user.trim() !== "" ? prod.user : "Qeydiyyatsız";
+    const userDisplay = prod.user?.trim() || "Qeydiyyatsız";
     const col = document.createElement("div");
     col.className = "col-sm-6 col-md-4 col-lg-3";
     col.innerHTML = `
@@ -52,7 +53,6 @@ function renderProducts(list) {
     productList.appendChild(col);
   });
 
-  // 🔹 Ətraflı baxış
   document.querySelectorAll(".btn-detail").forEach((btn) => {
     btn.addEventListener("click", () => {
       const prod = JSON.parse(btn.dataset.product);
@@ -61,7 +61,7 @@ function renderProducts(list) {
   });
 }
 
-// 🔹 Modalda detallar
+// 🔹 Məhsul detalları (modal)
 function showDetails(prod) {
   const userDisplay = prod.user || "Qeydiyyatsız";
   document.getElementById("detailTitle").textContent = prod.ad;
@@ -85,18 +85,18 @@ function showDetails(prod) {
   new bootstrap.Modal(document.getElementById("detailModal")).show();
 }
 
-// 🔹 Firebase-dən məlumatları oxuma
+// 🔹 Firebase məlumatlarını oxuma (REAL-TIME)
 const productsRef = ref(db, "products");
 onValue(productsRef, (snapshot) => {
   const data = snapshot.val();
-  products = data ? Object.values(data) : [];
-  renderProducts(products);
+  firebaseProducts = data ? Object.values(data) : [];
+  renderProducts(firebaseProducts);
 });
 
-// 🔹 Axtarış
+// 🔹 Axtarış funksiyası
 function searchProducts(value) {
   showLoading(() => {
-    const filtered = products.filter(
+    const filtered = firebaseProducts.filter(
       (p) =>
         p.ad?.toLowerCase().includes(value) ||
         p.tesvir?.toLowerCase().includes(value)
@@ -112,12 +112,14 @@ floatingSearchInput?.addEventListener("input", (e) =>
   searchProducts(e.target.value.toLowerCase())
 );
 
-// 🔹 Brand (kateqoriya) filter
+// 🔹 Marka/kateqoriya filtr
 brandList?.addEventListener("click", (e) => {
   if (e.target.tagName === "LI") {
     const brand = e.target.textContent.trim();
     showLoading(() => {
-      const filtered = products.filter((p) => p.kateqoriya === brand);
+      const filtered = firebaseProducts.filter(
+        (p) => p.kateqoriya === brand
+      );
       renderProducts(filtered);
     });
   }
