@@ -62,9 +62,8 @@ function showDetails(prod) {
   document.getElementById("detailTitle").textContent = prod.ad;
   document.getElementById("detailBody").innerHTML = `
     <div class="text-center mb-3">
-      <img src="${
-        prod.photo || "https://via.placeholder.com/300x200"
-      }" class="img-fluid mb-3 object-fit-contain" style="max-height:250px;">
+      <img src="${prod.photo || "https://via.placeholder.com/300x200"}"
+           class="img-fluid mb-3 object-fit-contain" style="max-height:250px;">
     </div>
     <ul class="list-group">
       <li class="list-group-item"><b>Ad:</b> ${prod.ad}</li>
@@ -74,9 +73,7 @@ function showDetails(prod) {
       <li class="list-group-item"><b>Daimi yaddaş:</b> ${prod.daimiyaddas}</li>
       <li class="list-group-item"><b>Prosessor:</b> ${prod.prossessor}</li>
       <li class="list-group-item"><b>Ekran:</b> ${prod.ekran}</li>
-      <li class="list-group-item"><b>Əməliyyat sistemi:</b> ${
-        prod.emmeliyyatsistem
-      }</li>
+      <li class="list-group-item"><b>Əməliyyat sistemi:</b> ${prod.emmeliyyatsistem}</li>
       <li class="list-group-item"><b>Təsvir:</b> ${prod.tesvir}</li>
       <li class="list-group-item"><b>İstifadəçi nömrəsi:</b> ${userDisplay}</li>
     </ul>`;
