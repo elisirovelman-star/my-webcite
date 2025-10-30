@@ -8,12 +8,8 @@ const floatingSearchInput = document.getElementById("floatingSearchInput");
 const brandList = document.getElementById("brandList");
 const loadingOverlay = document.getElementById("loadingOverlay");
 
-// 🔹 Məhsul siyahısı Firebase-dən gələcək
-let firebaseProducts = [];
-
 // 🔹 Yüklənmə animasiyası
 function showLoading(callback) {
-  if (!loadingOverlay) return callback && callback();
   loadingOverlay.classList.add("show");
   setTimeout(() => {
     loadingOverlay.classList.remove("show");
@@ -23,15 +19,15 @@ function showLoading(callback) {
 
 // 🔹 Məhsulları ekrana yazmaq funksiyası
 function renderProducts(list) {
-  if (!productList) return;
   productList.innerHTML = "";
-  if (!list || list.length === 0) {
+  if (list.length === 0) {
     productList.innerHTML = `<h4 class='text-center text-muted mt-5'>Heç bir məhsul tapılmadı</h4>`;
     return;
   }
 
   list.forEach((prod) => {
     const userDisplay = prod.user?.trim() || "Qeydiyyatsız";
+
     const col = document.createElement("div");
     col.className = "col-sm-6 col-md-4 col-lg-3";
     col.innerHTML = `
@@ -85,15 +81,17 @@ function showDetails(prod) {
   new bootstrap.Modal(document.getElementById("detailModal")).show();
 }
 
-// 🔹 Firebase məlumatlarını oxuma (REAL-TIME)
+// 🔹 Firebase məlumatlarını oxumaq
+let firebaseProducts = [];
+
 const productsRef = ref(db, "products");
 onValue(productsRef, (snapshot) => {
   const data = snapshot.val();
-  firebaseProducts = data ? Object.values(data) : [];
+  firebaseProducts = Object.values(data || {});
   renderProducts(firebaseProducts);
 });
 
-// 🔹 Axtarış funksiyası
+// 🔹 Axtarış
 function searchProducts(value) {
   showLoading(() => {
     const filtered = firebaseProducts.filter(
@@ -117,9 +115,7 @@ brandList?.addEventListener("click", (e) => {
   if (e.target.tagName === "LI") {
     const brand = e.target.textContent.trim();
     showLoading(() => {
-      const filtered = firebaseProducts.filter(
-        (p) => p.kateqoriya === brand
-      );
+      const filtered = firebaseProducts.filter((p) => p.kateqoriya === brand);
       renderProducts(filtered);
     });
   }
