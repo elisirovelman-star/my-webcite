@@ -1,11 +1,14 @@
+// 🔹 Firebase bağlantısı
+import { db, ref, onValue } from "./firebase.js";
+
+// 🔹 HTML elementlərini seçirik
 const productList = document.getElementById("productList");
 const searchInput = document.getElementById("searchInput");
 const floatingSearchInput = document.getElementById("floatingSearchInput");
 const brandList = document.getElementById("brandList");
 const loadingOverlay = document.getElementById("loadingOverlay");
 
-const products = JSON.parse(localStorage.getItem("products")) || [];
-
+// 🔹 Yüklənmə animasiyası
 function showLoading(callback) {
   loadingOverlay.classList.add("show");
   setTimeout(() => {
@@ -14,6 +17,7 @@ function showLoading(callback) {
   }, 800);
 }
 
+// 🔹 Məhsulları ekrana yazmaq funksiyası
 function renderProducts(list) {
   productList.innerHTML = "";
   if (list.length === 0) {
@@ -22,10 +26,7 @@ function renderProducts(list) {
   }
 
   list.forEach((prod) => {
-    let userDisplay = "Qeydiyyatsız";
-    if (prod.user && prod.user.trim() !== "") {
-      userDisplay = prod.user;
-    }
+    const userDisplay = prod.user?.trim() || "Qeydiyyatsız";
 
     const col = document.createElement("div");
     col.className = "col-sm-6 col-md-4 col-lg-3";
@@ -56,59 +57,66 @@ function renderProducts(list) {
   });
 }
 
+// 🔹 Məhsul detalları (modal)
 function showDetails(prod) {
-  let userDisplay = prod.user || "Qeydiyyatsız";
-
+  const userDisplay = prod.user || "Qeydiyyatsız";
   document.getElementById("detailTitle").textContent = prod.ad;
   document.getElementById("detailBody").innerHTML = `
     <div class="text-center mb-3">
-      <img src="${
-        prod.photo || "https://via.placeholder.com/300x200"
-      }" class="img-fluid mb-3 object-fit-contain" style="max-height:250px;">
+      <img src="${prod.photo || "https://via.placeholder.com/300x200"}"
+           class="img-fluid mb-3 object-fit-contain" style="max-height:250px;">
     </div>
     <ul class="list-group">
       <li class="list-group-item"><b>Ad:</b> ${prod.ad}</li>
       <li class="list-group-item"><b>Qiymət:</b> ${prod.qiymet} AZN</li>
       <li class="list-group-item"><b>Kateqoriya:</b> ${prod.kateqoriya}</li>
-      <li class="list-group-item"><b>Əməli yaddaş:</b> ${prod.emmeliyaddas}</li>
-      <li class="list-group-item"><b>Daimi yaddaş:</b> ${prod.daimiyaddas}</li>
-      <li class="list-group-item"><b>Prosessor:</b> ${prod.prossessor}</li>
-      <li class="list-group-item"><b>Ekran:</b> ${prod.ekran}</li>
-      <li class="list-group-item"><b>Əməliyyat sistemi:</b> ${
-        prod.emmeliyyatsistem
-      }</li>
-      <li class="list-group-item"><b>Təsvir:</b> ${prod.tesvir}</li>
+      <li class="list-group-item"><b>Əməli yaddaş:</b> ${prod.emmeliyaddas || "-"}</li>
+      <li class="list-group-item"><b>Daimi yaddaş:</b> ${prod.daimiyaddas || "-"}</li>
+      <li class="list-group-item"><b>Prosessor:</b> ${prod.prossessor || "-"}</li>
+      <li class="list-group-item"><b>Ekran:</b> ${prod.ekran || "-"}</li>
+      <li class="list-group-item"><b>Əməliyyat sistemi:</b> ${prod.emmeliyyatsistem || "-"}</li>
+      <li class="list-group-item"><b>Təsvir:</b> ${prod.tesvir || "-"}</li>
       <li class="list-group-item"><b>İstifadəçi nömrəsi:</b> ${userDisplay}</li>
     </ul>`;
   new bootstrap.Modal(document.getElementById("detailModal")).show();
 }
 
+// 🔹 Firebase məlumatlarını oxumaq
+let firebaseProducts = [];
+
+const productsRef = ref(db, "products");
+onValue(productsRef, (snapshot) => {
+  const data = snapshot.val();
+  firebaseProducts = Object.values(data || {});
+  renderProducts(firebaseProducts);
+});
+
+// 🔹 Axtarış
 function searchProducts(value) {
   showLoading(() => {
-    const filtered = products.filter(
+    const filtered = firebaseProducts.filter(
       (p) =>
-        p.ad.toLowerCase().includes(value) ||
-        (p.tesvir && p.tesvir.toLowerCase().includes(value))
+        p.ad?.toLowerCase().includes(value) ||
+        p.tesvir?.toLowerCase().includes(value)
     );
     renderProducts(filtered);
   });
 }
 
-searchInput.addEventListener("input", (e) =>
+searchInput?.addEventListener("input", (e) =>
   searchProducts(e.target.value.toLowerCase())
 );
-floatingSearchInput.addEventListener("input", (e) =>
+floatingSearchInput?.addEventListener("input", (e) =>
   searchProducts(e.target.value.toLowerCase())
 );
 
-brandList.addEventListener("click", (e) => {
+// 🔹 Marka/kateqoriya filtr
+brandList?.addEventListener("click", (e) => {
   if (e.target.tagName === "LI") {
     const brand = e.target.textContent.trim();
     showLoading(() => {
-      const filtered = products.filter((p) => p.kateqoriya === brand);
+      const filtered = firebaseProducts.filter((p) => p.kateqoriya === brand);
       renderProducts(filtered);
     });
   }
 });
-
-renderProducts(products);
