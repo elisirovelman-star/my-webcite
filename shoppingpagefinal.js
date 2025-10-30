@@ -1,122 +1,167 @@
-// 🔹 Firebase bağlantısı
-import { db, ref, onValue } from "./firebase.js";
-
-// 🔹 HTML elementlərini seçirik
-const productList = document.getElementById("productList");
-const searchInput = document.getElementById("searchInput");
-const floatingSearchInput = document.getElementById("floatingSearchInput");
-const brandList = document.getElementById("brandList");
-const loadingOverlay = document.getElementById("loadingOverlay");
-
-// 🔹 Yüklənmə animasiyası
-function showLoading(callback) {
-  loadingOverlay.classList.add("show");
-  setTimeout(() => {
-    loadingOverlay.classList.remove("show");
-    if (callback) callback();
-  }, 800);
-}
-
-// 🔹 Məhsulları ekrana yazmaq funksiyası
-function renderProducts(list) {
-  productList.innerHTML = "";
-  if (list.length === 0) {
-    productList.innerHTML = `<h4 class='text-center text-muted mt-5'>Heç bir məhsul tapılmadı</h4>`;
-    return;
-  }
-
-  list.forEach((prod) => {
-    const userDisplay = prod.user?.trim() || "Qeydiyyatsız";
-
-    const col = document.createElement("div");
-    col.className = "col-sm-6 col-md-4 col-lg-3";
-    col.innerHTML = `
-      <div class="card h-100 shadow-sm">
-        <img src="${prod.photo || "https://via.placeholder.com/200x150"}"
-             class="card-img-top"
-             alt="${prod.ad}">
-        <div class="card-body">
-          <h5 class="card-title">${prod.ad}</h5>
-          <p class="card-text"><b>Qiymət:</b> ${prod.qiymet} AZN</p>
-          <p class="card-text"><b>Kateqoriya:</b> ${prod.kateqoriya}</p>
-          <p class="card-text"><b>İstifadəçi nömrəsi:</b> ${userDisplay}</p>
-        </div>
-        <div class="card-footer text-center">
-          <button class="btn btn-primary btn-detail"
-            data-product='${JSON.stringify(prod)}'>Ətraflı</button>
-        </div>
-      </div>`;
-    productList.appendChild(col);
-  });
-
-  document.querySelectorAll(".btn-detail").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const prod = JSON.parse(btn.dataset.product);
-      showDetails(prod);
-    });
-  });
-}
-
-// 🔹 Məhsul detalları (modal)
-function showDetails(prod) {
-  const userDisplay = prod.user || "Qeydiyyatsız";
-  document.getElementById("detailTitle").textContent = prod.ad;
-  document.getElementById("detailBody").innerHTML = `
-    <div class="text-center mb-3">
-      <img src="${prod.photo || "https://via.placeholder.com/300x200"}"
-           class="img-fluid mb-3 object-fit-contain" style="max-height:250px;">
-    </div>
-    <ul class="list-group">
-      <li class="list-group-item"><b>Ad:</b> ${prod.ad}</li>
-      <li class="list-group-item"><b>Qiymət:</b> ${prod.qiymet} AZN</li>
-      <li class="list-group-item"><b>Kateqoriya:</b> ${prod.kateqoriya}</li>
-      <li class="list-group-item"><b>Əməli yaddaş:</b> ${prod.emmeliyaddas || "-"}</li>
-      <li class="list-group-item"><b>Daimi yaddaş:</b> ${prod.daimiyaddas || "-"}</li>
-      <li class="list-group-item"><b>Prosessor:</b> ${prod.prossessor || "-"}</li>
-      <li class="list-group-item"><b>Ekran:</b> ${prod.ekran || "-"}</li>
-      <li class="list-group-item"><b>Əməliyyat sistemi:</b> ${prod.emmeliyyatsistem || "-"}</li>
-      <li class="list-group-item"><b>Təsvir:</b> ${prod.tesvir || "-"}</li>
-      <li class="list-group-item"><b>İstifadəçi nömrəsi:</b> ${userDisplay}</li>
-    </ul>`;
-  new bootstrap.Modal(document.getElementById("detailModal")).show();
-}
-
-// 🔹 Firebase məlumatlarını oxumaq
-let firebaseProducts = [];
-
-const productsRef = ref(db, "products");
-onValue(productsRef, (snapshot) => {
-  const data = snapshot.val();
-  firebaseProducts = Object.values(data || {});
-  renderProducts(firebaseProducts);
+$(document).ready(function () {
+   const table = $("#dataTable").DataTable({
+    stateSave: false,
+    destroy: true,
+    data: [],
+    columns: [
+        { title: "ID" },
+        { title: "Ad" },
+        { title: "Şəkil" },
+        { title: "Qiymət" },
+        { title: "Əməliyyatlar" }
+    ]
 });
+    const modal = new bootstrap.Modal(document.getElementById("dataModal"));
+    let editIndex = null;
 
-// 🔹 Axtarış
-function searchProducts(value) {
-  showLoading(() => {
-    const filtered = firebaseProducts.filter(
-      (p) =>
-        p.ad?.toLowerCase().includes(value) ||
-        p.tesvir?.toLowerCase().includes(value)
-    );
-    renderProducts(filtered);
-  });
+    function loadData() {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const activeUser = sessionStorage.getItem("activeUser");
+
+    if (!currentUser || !activeUser || (currentUser.phone || currentUser.username) !== activeUser) {
+        const table = $("#dataTable").DataTable();
+        table.clear().draw();
+        alert("Zəhmət olmasa daxil olun!");
+        window.location.href = "loginpagefinal.html";
+        return;
+    }
+
+    const userNumber = currentUser.phone || currentUser.username;
+    const allProducts = JSON.parse(localStorage.getItem("products")) || [];
+
+    const userProducts = allProducts.filter(p => p.user === userNumber);
+
+    table.clear();
+
+    userProducts.forEach((item, idx) => {
+        const id = 1001 + idx;
+        table.row.add([
+            id,
+            item.ad || "—",
+            `<img src="${item.photo || 'https://via.placeholder.com/100'}"
+                class="preview-img clickable-img"
+                style="width:50px;height:50px;object-fit:contain;">`,
+            item.qiymet || "—",
+            `
+            <button class="btn btn-sm btn-danger delete-btn me-2" data-index="${idx}">Sil</button>
+            <button class="btn btn-sm btn-primary edit-btn" data-index="${idx}">Redaktə</button>
+            `
+        ]);
+    });
+
+    table.draw(false);
 }
 
-searchInput?.addEventListener("input", (e) =>
-  searchProducts(e.target.value.toLowerCase())
-);
-floatingSearchInput?.addEventListener("input", (e) =>
-  searchProducts(e.target.value.toLowerCase())
-);
+    loadData();
 
-// 🔹 Marka/kateqoriya filtr
-brandList?.addEventListener("click", (e) => {
-  if (e.target.tagName === "LI") {
-    const brand = e.target.textContent.trim();
-    showLoading(() => {
-      const filtered = firebaseProducts.filter((p) => p.kateqoriya === brand);
-      renderProducts(filtered);
+    $("#dataForm").on("submit", function (e) {
+        e.preventDefault();
+        const form = this;
+        if (!form.checkValidity()) {
+            form.classList.add("was-validated");
+            return;
+        }
+
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        const userNumber = currentUser.phone || currentUser.username;
+
+        const newProduct = {
+            kateqoriya: $("#kateqoriya").val(),
+            emmeliyaddas: $("#emmeliyaddas").val(),
+            ad: $("#ad").val(),
+            prossessor: $("#prossessor").val(),
+            qiymet: $("#qiymet").val(),
+            daimiyaddas: $("#daimiyaddas").val(),
+            tesvir: $("#tesvir").val(),
+            daimiyaddastipi: $("#daimiyaddastipi").val(),
+            batareya: $("#batareya").val(),
+            ekran: $("#ekran").val(),
+            emmeliyyatsistem: $("#emmeliyyatsistem").val(),
+            yeni: $("#yeni").val(),
+            photo: $("#photo").val(),
+            user: userNumber
+        };
+
+        let allProducts = JSON.parse(localStorage.getItem("products")) || [];
+
+        if (editIndex !== null) {
+            const userProducts = allProducts.filter(p => p.user === userNumber);
+            const productToEdit = userProducts[editIndex];
+            const realIndex = allProducts.findIndex(p => p === productToEdit);
+            if (realIndex !== -1) {
+                allProducts[realIndex] = newProduct;
+            }
+            editIndex = null;
+        } else {
+            allProducts.push(newProduct);
+        }
+
+        localStorage.setItem("products", JSON.stringify(allProducts));
+        loadData();
+        modal.hide();
+        form.reset();
+        form.classList.remove("was-validated");
+        $("#preview").hide();
     });
-  }
+
+    $("#dataTable").on("click", ".edit-btn", function () {
+        const index = $(this).data("index");
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        const userNumber = currentUser.phone || currentUser.username;
+        const data = JSON.parse(localStorage.getItem("products")) || [];
+        const userProducts = data.filter(p => p.user === userNumber);
+        const item = userProducts[index];
+        if (!item) return alert("Xəta: Məhsul tapılmadı!");
+
+        $("#kateqoriya").val(item.kateqoriya);
+        $("#emmeliyaddas").val(item.emmeliyaddas);
+        $("#ad").val(item.ad);
+        $("#prossessor").val(item.prossessor);
+        $("#qiymet").val(item.qiymet);
+        $("#daimiyaddas").val(item.daimiyaddas);
+        $("#tesvir").val(item.tesvir);
+        $("#daimiyaddastipi").val(item.daimiyaddastipi);
+        $("#batareya").val(item.batareya);
+        $("#ekran").val(item.ekran);
+        $("#emmeliyyatsistem").val(item.emmeliyyatsistem);
+        $("#yeni").val(item.yeni);
+        $("#photo").val(item.photo);
+        $("#preview").attr("src", item.photo).show();
+
+        editIndex = index;
+        modal.show();
+    });
+
+    $("#dataTable").on("click", ".delete-btn", function () {
+        const index = $(this).data("index");
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        const userNumber = currentUser.phone || currentUser.username;
+        let data = JSON.parse(localStorage.getItem("products")) || [];
+        const userProducts = data.filter(p => p.user === userNumber);
+        const productToDelete = userProducts[index];
+        const realIndex = data.findIndex(p => p === productToDelete);
+
+        if (realIndex !== -1 && confirm("Məhsulu silmək istəyirsən?")) {
+            data.splice(realIndex, 1);
+            localStorage.setItem("products", JSON.stringify(data));
+            loadData();
+        }
+    });
+
+    $("#dataTable").on("click", ".preview-img", function () {
+        $("#modalImage").attr("src", $(this).attr("src"));
+        new bootstrap.Modal(document.getElementById("photoModal")).show();
+    });
+
+    $("#photo").on("input", function () {
+        const url = $(this).val().trim();
+        if (url) $("#preview").attr("src", url).show();
+        else $("#preview").hide();
+    });
+
+    $('[data-bs-target="#dataModal"]').on("click", function () {
+        editIndex = null;
+        $("#dataForm")[0].reset();
+        $("#preview").hide();
+    });
 });
